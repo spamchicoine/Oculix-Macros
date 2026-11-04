@@ -9,7 +9,7 @@ Chest_Regions = [
 
 Ore_Deposits  = [None, "Ore_Deposit_0.png", None, None]
 
-Ore_Regions = [None, Location(s.x+ 1140, 690), None, None]
+Ore_Regions = [None, Location(m*s.x+ 1140, 790), None, None]
 
 C_Flags = [0, 0, 1, 0]
 
@@ -24,10 +24,10 @@ def Inn_Test():
     s.wait("Inn_Eco_Room_icon.png",d).highlight(1).click()
     s.wait("OK_icon.png",d).highlight(1).click()
     s.wait("Refilled_Icon.png",d*3).highlight(1).click()
-    icon = s.exists("Level_Up_Next_Icon.png",d)
+    icon = s.exists("Close_lvl_up.png",d)
     if icon != None:
         icon.highlight(1).click()
-    icon = s.exists("Close_Icon.png",d)
+    icon = s.exists("Close_lvl_up.png",d)
     if icon != None:
         icon.highlight(1).click()
     s.wait("Inn_Exit_icon.png",d).highlight(1).click()
@@ -37,10 +37,13 @@ def Inn_Test():
 
 #Nav_Map()
 
-#Settings.MinSimilarity = 0.7
-#s.wait("Close_Map_Icon.png",d).highlight(1)
+#s.click(Location(1110, 100))
 
-while True:
+#Settings.MinSimilarity = 0.7
+#s.wait("Inn_icon.png",d*6).highlight(1)
+
+
+while False:
 
     GOTO_Ghost_Castle()
 

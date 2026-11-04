@@ -1,7 +1,7 @@
 import time
 
-s=Screen(1)
-m = True #True if running on secondary screen
+s=Screen(0)
+m = False #True if running on secondary screen
 d = 10 #standard wait time
 
 Settings.MinSimilarity = 0.8
@@ -30,7 +30,7 @@ def GOTO_Ghost_Castle():
             icon.highlight(1).click()
             
         else:
-            s.click(Location(s.x+1190, 940))
+            s.click(Location(m*s.x+1190, 1040))
     return
 
 def GOTO_Northern_Hollow():
@@ -38,6 +38,7 @@ def GOTO_Northern_Hollow():
     while True:
         icon = s.exists("Inn_Icon.png",d)
         if icon != None:
+            print("found inn")
             break
         
         Settings.MoveMouseDelay = 0
@@ -51,7 +52,8 @@ def GOTO_Northern_Hollow():
             icon.highlight(1).click()
             
         else:
-            s.click(Location(s.x+1190, 940))
+            print("gotis")           
+            s.click(Location(m*s.x+1190, 1040))
     return
 
 def Open_Map():
@@ -76,7 +78,7 @@ def In_Dungeon():
 def Check_Chest():
     Settings.MinSimilarity = 0.8
     checked = True
-    Open_Chest_Icon = s.exists("Open_Chest_Icon.png",d*2)
+    Open_Chest_Icon = s.exists("Open_Chest_Icon.png",d*4)
     if Open_Chest_Icon != None:
         Open_Chest_Icon.highlight(1).click()
         print("Found Chest")
@@ -240,25 +242,23 @@ def Combat_Loop(i):
                 
             print("combat found")
     
-        Exp_icon = s.wait("Exp_icon.png",d*6).highlight(1)
-        print("Combat completed")
         
         Check_Chest()
         #Check_Afflictions():
     
-        s.wait("In_Dungeon_Icon.png",d*3).highlight(1)    # Check if we are back in dungeon area
+        In_Dungeon()
     return  # No more combat found
 
 def Disarm_Chest():
     Settings.WaitScanRate = 30
     Settings.MinSimilarity = 0.9
     Settings.MoveMouseDelay = 0
-    Disarms_Left_Region = Region(3247, 62, 35, 35)
-    Disarm_Region = Region(3200, -50, 632, 70)
-    left = 3225
-    right = 3817
-    center = 3516
-    disarm = 3674
+    Disarms_Left_Region = Region(685, 160, 40, 40)
+    Disarm_Region = Region(650, 55, 632, 70)
+    left = 670
+    right = 1245
+    center = 960
+    disarm = 1110
 
     flag = True
     while flag:
@@ -277,7 +277,7 @@ def Disarm_Chest():
             if Disarm_Marker.x >= center:
                 ncenter = Disarm_Marker.x
                 print("At center", ncenter)
-                s.click(Location(950+s.x*m, 550))
+                s.click(Location(950+s.x*m, 650))
                 flag =  False
                 
                 icon = Disarms_Left_Region.exists("2_Disarms_Left.png",2)
@@ -304,7 +304,7 @@ def Disarm_Chest():
         if Disarm_Marker:
             print(Disarm_Marker)
             if Disarm_Marker.x >= Stop_Distance:
-                s.click(Location(950+s.x*m, 550))
+                s.click(Location(950+s.x*m, 650))
                 print("At stop point", Disarm_Marker.x)
                 flag =  False
                 

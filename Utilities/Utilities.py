@@ -1,27 +1,54 @@
 import time
 
-s=Screen(0)
-m = False #True if running on secondary screen
+#Num_Screens = Screen.getNumberScreens()    # Number of total monitors detected
+#Active_Screen = 0    # Screen which holds application
+
+#Screens = []
+#for i in range(Num_Screens):
+    #Screens.append(Screen(i))
+
+s = Screen(1)
+m = True
+
 d = 10 #standard wait time
 
 Settings.MinSimilarity = 0.8
 Settings.MoveMouseDelay = 0.5
 Settings.ObserveScanRate = 3
 
+Last_icon = None
+Last_d = None
+
+#--- Oculix Wrapper ---
+def safe_wait(icon, delay):
+    while True:
+        try:
+            icon = s.wait(icon, delay)
+            break
+    
+        except FindFailed:
+            while True:
+                icon = s.exists("Retry_icon.png",d)
+                if icon != None:
+                    icon.click()
+                else:
+                    break
+                
+    return icon        
 
 #--- Functions ---
 
 def GOTO_Ghost_Castle():
     Settings.MinSimilarity = 0.8
     while True:
-        icon = s.exists("Ghost_Castle_Entrance_icon.png",d)
+        icon = s.exists("Ghost_Castle_Entrance_icon.png",4)
         if icon != None:
             break
         
         Settings.MoveMouseDelay = 0
-        icon = s.exists("World_Map_Button.png",d*3)
+        icon = s.exists("World_Map_icon.png",d*3)
         if icon != None:
-            icon.click()
+            icon.highlight(1).click()
 
 
         time.sleep(4)
@@ -30,7 +57,7 @@ def GOTO_Ghost_Castle():
             icon.highlight(1).click()
             
         else:
-            s.click(Location(m*s.x+1190, 1040))
+            s.click(Location(m*s.x+1190, 1040-100*m))
     return
 
 def GOTO_Northern_Hollow():
@@ -53,7 +80,7 @@ def GOTO_Northern_Hollow():
             
         else:
             print("gotis")           
-            s.click(Location(m*s.x+1190, 1040))
+            s.click(Location(m*s.x+1190, 1040-100*m))
     return
 
 def Open_Map():
@@ -197,6 +224,7 @@ def Check_Ore(i):
     
     if Ore_Regions[i] != None:
         s.click(Ore_Regions[i])
+        time.sleep(1)
         s.click(Location(Ore_Regions[i].x, Ore_Regions[i].y - 80))
         time.sleep(5)
         
@@ -253,12 +281,12 @@ def Disarm_Chest():
     Settings.WaitScanRate = 30
     Settings.MinSimilarity = 0.9
     Settings.MoveMouseDelay = 0
-    Disarms_Left_Region = Region(685, 160, 40, 40)
-    Disarm_Region = Region(650, 55, 632, 70)
-    left = 670
-    right = 1245
-    center = 960
-    disarm = 1110
+    Disarms_Left_Region = Region(m*s.x + 685, 160 - 100*m, 40, 40)
+    Disarm_Region = Region(m*s.x + 650, 55 - 100*m, 632, 70)
+    left = m*s.x + 670
+    right = m*s.x + 1245
+    center = m*s.x + 960
+    disarm = m*s.x + 1110
 
     flag = True
     while flag:
@@ -277,7 +305,7 @@ def Disarm_Chest():
             if Disarm_Marker.x >= center:
                 ncenter = Disarm_Marker.x
                 print("At center", ncenter)
-                s.click(Location(950+s.x*m, 650))
+                s.click(Location(950+s.x*m, 650 - 100*m))
                 flag =  False
                 
                 icon = Disarms_Left_Region.exists("2_Disarms_Left.png",2)
@@ -304,7 +332,7 @@ def Disarm_Chest():
         if Disarm_Marker:
             print(Disarm_Marker)
             if Disarm_Marker.x >= Stop_Distance:
-                s.click(Location(950+s.x*m, 650))
+                s.click(Location(950+s.x*m, 650 - 100*m))
                 print("At stop point", Disarm_Marker.x)
                 flag =  False
                 

@@ -1,8 +1,8 @@
 import time
 import sys
 
-s = Screen(1)
-m = True
+s = Screen(0)
+m = False
 
 d = 10 #standard wait time
 
@@ -15,6 +15,8 @@ Dungeon_Entered = False
 Region_Clear = False
 Stayed_Inn = False
 Exiting_Inn = False
+Set_Sheli = False
+Sheli_Order = 1
 
 MC_Map_Icons = ["MC_Map_Icon_0.png", "MC_Map_Icon_1.png", "MC_Map_Icon_2.png", "MC_Map_Icon_3.png"]
 
@@ -39,35 +41,45 @@ def Open_World_Map(icon):    # Click the open map button provided
     return
 
 def Network_Retry():
+    print("Detected disconnect")
     icon = s.exists("Retry_icon.png",1)
     while icon != None:
         icon.highlight(1).click()
+        time.sleep(2)
         icon = s.exists("Retry_icon.png", 1)
+        
+    print("Disconnect cleared")
     return
 
 def Open_Map():
     icon = s.exists("In_Dungeon_Icon.png",2)
     if icon != None:
+        print("Opening map")
+        Settings.MoveMouseDelay = 0
         click(Location(icon.x, icon.y - 100))
         time.sleep(1)
+        
+    Settings.MoveMouseDelay = 0.5
     return
 
 def In_Dungeon():
+    global Dungeon_Entered
     Settings.MinSimilarity = 0.9    
     In_Dungeon = False
-    s.exists("In_Dungeon_Icon.png", d*3)
+    s.exists("In_Dungeon_Icon.png", d)
     
     for i in range(2):
         time.sleep(1)
         icon = s.exists("In_Dungeon_Icon.png",0)
 
         if icon != None:
-            icon.highlight(1)
+            #icon.highlight(1)
             In_Dungeon = icon
         else:
             In_Dungeon = None
             break
     if In_Dungeon:
+        Dungeon_Entered = True
         Open_Map()
             
     print("In Dungeon", In_Dungeon)
@@ -84,22 +96,23 @@ def Check_Chest():
         checked = True
         print("Found Chest")
             
-    Afraid_of_Traps_Icon = s.exists("Afraid_of_Traps_Icon.png",d)
-    if Afraid_of_Traps_Icon != None:    # If not afraid of tresure chests open with MC
-        Afraid_of_Traps_Icon.highlight(1)
-        checked = False
-        print("MC afraid of traps")
-        icon = s.exists("Close_Chest_Icon.png",d)
-        if icon != None:
-            icon.highlight(1).click()
-    else:
-        Settings.MinSimilarity = 0.9
-        icon = s.exists("MC_icon.png",d)
-        if icon != None:
-            icon.highlight(1).click()    # By default use MC to open chest
-        Settings.MinSimilarity = 0.8
+    #Afraid_of_Traps_Icon = s.exists("Afraid_of_Traps_Icon.png",d)
+    #if Afraid_of_Traps_Icon != None:    # If not afraid of tresure chests open with MC
+      #  Afraid_of_Traps_Icon.highlight(1)
+      #  checked = False
+      #  print("MC afraid of traps")
+      #  icon = s.exists("Close_Chest_Icon.png",d)
+      #  if icon != None:
+            #icon.highlight(1).click()
+    #else:
+        #Settings.MinSimilarity = 0.9
+        #icon = s.exists("Yuzu_Icon.png",d)
+        #if icon != None:
+            #icon.highlight(1).click()    # By default use MC to open chest
+        #Settings.MinSimilarity = 0.8
 
     return checked
+
 
 # If MC is afraid of chests attempt to clear
 def Check_Chest_Fear():
@@ -122,15 +135,16 @@ def Check_Chest_Fear():
     return
 
 def Check_Afflictions(s):
+    #TODO
     return
 
 def Dungeon_Entrance(icon):    # Handle setting flags and states to exit Clear_Dungeon()
     global Region_Clear
-    global Dungeon_Entered
+    #global Dungeon_Entered
 
     if not Dungeon_Entered:
         icon.highlight(1).click()
-        Dungeon_Entered = True
+        #Dungeon_Entered = True
         
     else:
         Region_Clear = True
@@ -161,9 +175,10 @@ def Nav_Map(o):
 
     Settings.MinSimilarity = 0.7
     print("Checking for region", o)
-    Reg = s.exists(Regions[o], 2).highlight(1)
+    Reg = s.exists(Regions[o], 2)
     
     if Reg != None:
+        Reg.highlight(1)
         
         Settings.MinSimilarity = 0.9
         print("Checking for chests in region", o)
@@ -180,7 +195,7 @@ def Nav_Map(o):
             # Go to region park position
             Settings.MinSimilarity = 0.9
             for i in MC_Map_Icons:
-                icon = s.exists(i,1)
+                icon = s.exists(i,0)
                         
                 if icon != None:
                     icon.highlight(1)
@@ -244,10 +259,31 @@ def Combat_Loop(i):
             
     return  # No more combat found
 
+def Auto_Battle(jcon):
+    global Set_Sheli
+
+    s.click(Location(690, 750))
+    time.sleep(2)
+
+    
+    for i in range(1,Sheli_Order):
+        jcon.click()
+        time.sleep(2)
+
+    s.click(Location(1100, 680))
+    time.sleep(2)
+    s.click(Location(1000, 1025))
+    time.sleep(0.2)
+    s.click(Location(1250, 750))
+    time.sleep(1)
+
+    return
+
 def Disarm_Chest():
     Settings.WaitScanRate = 30
     Settings.MinSimilarity = 0.9
     Settings.MoveMouseDelay = 0
+    global Stop_Distance
     Disarms_Left_Region = Region(m*s.x + 685, 160 - 100*m, 40, 40)
     Disarm_Region = Region(m*s.x + 650, 55 - 100*m, 632, 70)
     left = m*s.x + 670
@@ -255,9 +291,11 @@ def Disarm_Chest():
     center = m*s.x + 960
     disarm = m*s.x + 1110
 
-    icon = Disarms_Left_Region.exists("3_Disarms_Left.png", 2)
+    #icon = Disarms_Left_Region.exists("3_Disarms_Left.png", 2)
+    icon = Disarms_Left_Region.exists("2_Disarms_Left.png",2)
     if icon != None:
-    
+
+        s_t = time.time()
         flag = True
         while flag:
             Disarm_Marker = Disarm_Region.exists("Disarm_Marker.png",0)
@@ -267,16 +305,23 @@ def Disarm_Chest():
                     print("At left", Disarm_Marker.x)
                     flag = False
                     
-    
+            if (time.time() - s_t) > 10:
+                print("Disarm timeout")
+                flag = False
+                    
+        s_t = time.time()
         flag = True
         while flag:
             Disarm_Marker = Disarm_Region.exists("Disarm_Marker.png",0)
             if Disarm_Marker:
                 print(Disarm_Marker)
+                
                 if Disarm_Marker.x >= center:
+                    s.click(Location(950+s.x*m, 650 - 100*m))
+                    
                     ncenter = Disarm_Marker.x
                     print("At center", ncenter)
-                    s.click(Location(950+s.x*m, 650 - 100*m))
+                    
                     flag =  False
                 
                     icon = Disarms_Left_Region.exists("2_Disarms_Left.png",2)
@@ -284,13 +329,25 @@ def Disarm_Chest():
                         return
                 
                     Disarm_Marker = Disarm_Region.exists("Disarm_Marker.png",1)
-                
-                    Stop_Distance = disarm - (Disarm_Marker.x - ncenter)
-                    print("Stop_Distance", Stop_Distance)
+
+                    if Disarm_Marker != None:
+                        Stop_Gap = Disarm_Marker.x - ncenter
+                        Stop_Distance = (disarm - Stop_Gap) - (Stop_Gap/4)
+                        print("Stop_Distance:", Stop_Distance, "Stop_Gap:", Stop_Gap)
+                        
+                    else:
+                        print("Stopped Marker not found")
+                                
+
+            if (time.time() - s_t) > 10:
+                print("Disarm timeout")
+                flag = False
                     
-    icon = Disarms_Left_Region.exists("2_Disarms_Left.png",2)
+    #icon = Disarms_Left_Region.exists("2_Disarms_Left.png",2)
     jcon = Disarms_Left_Region.exists("1_Disarms_Left.png", 2)
     if icon != None or jcon != None:
+
+        s_t = time.time()
         flag = True
         while flag:
             Disarm_Marker = Disarm_Region.exists("Disarm_Marker.png",0)
@@ -299,7 +356,12 @@ def Disarm_Chest():
                 if Disarm_Marker.x <= left:
                     print("At left", Disarm_Marker.x)
                     flag = False
+
+            if (time.time() - s_t) > 10:
+                print("Disarm timeout")
+                flag = False
                 
+        s_t = time.time()
         flag = True
         while flag:
             Disarm_Marker = Disarm_Region.exists("Disarm_Marker.png",0)
@@ -309,6 +371,10 @@ def Disarm_Chest():
                     s.click(Location(950+s.x*m, 650 - 100*m))
                     print("At stop point", Disarm_Marker.x)
                     flag =  False
+
+            if (time.time() - s_t) > 10:
+                print("Disarm timeout")
+                flag = False
                 
     Settings.WaitScanRate = 3
     Settings.MoveMouseDelay = 0.3
@@ -323,7 +389,8 @@ def Check_Ore(i):
     
         if Ore_Deposit is None:
             print("Ore deposit not detected")
-            Ore_Socket = s.exists("Ore_Socket.png",4)
+            Settings.MinSimilarity = 0.7
+            Ore_Socket = s.exists("Ore_Socket.png",d)
             if Ore_Socket != None:
                 Ore_Socket.highlight(1)
                 print("Ore Socket Detected")
@@ -334,14 +401,20 @@ def Check_Ore(i):
         else:
             Ore_Deposit.highlight(1)
             s.click(s.getCenter())
-            icon = s.exists("You_Received.png",d).highlight(1)
+            icon = s.exists("You_Received.png",d)
             if icon != None:
-                s.click(s.getCenter())
-                icon = s.exists("Pickaxe_Broken.png",3)
-            if icon != None:
-                time.sleep(3)
+                Check_Recieved(icon)
                 
     return Deposit_Cleared
+
+def Check_Recieved(icon):
+    icon.highlight(1).click()
+    icon = s.exists("Pickaxe_Broken.png",3)
+    if icon != None:
+        time.sleep(3)
+        
+    return
+    
 
 def GOTO_Stay_Inn():
     global State
@@ -389,6 +462,10 @@ def Inn_Menu(icon):
     else:
         icon.highlight(1).click()
         
+    return
+
+def Was_Learned(icon):
+    click(Location(icon.getCenter().x, icon.getCenter().y - 100))
     return
 
 def Staying_Inn(icon):

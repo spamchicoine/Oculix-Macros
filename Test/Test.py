@@ -2,9 +2,9 @@ Regions = ["Region_0.png", "Region_1.png", "Region_2.png", "Region_3.png", "Regi
 
 Region_Offset = [[-20, 50], [0, 30], [-35, -20], [35, -20], [0, 0]]
 
-Ore_Deposits  = ["Ore_Deposit_0.png", None, None, None, None]
+Ore_Deposits  = ["Ore_Deposit_0.png", None, "Ore_Deposit_1.png", "Ore_Deposit_1.png", None]
 
-Ore_Offset = [[200, 160], None, None]    #Offset from corner of Region to ore location
+Ore_Offset = [[200, 160], None, [60, 200], [275, 205], None]    #Offset from corner of Region to ore location
 
 States = ["Stay_Inn", "GOTO_Ghost_Castle", "GOTO_Northern_Hollow", "Clearing_Dungeon"]    #Possible States
 State = States[0] # Starting state
@@ -26,7 +26,7 @@ def New_GOTO_NH():
             if icon != None:    # Check if scenario is present
                 icon.highlight(1)
                 print("Found",j)
-                func(*args(jcon=icon, target="Northern_Hollow_Icon.png"))     # *args handles passes in an abritrary number of arguments to abritrary functions
+                func(*args(jcon=icon, target = "Northern_Hollow_Icon.png"))     # *args handles passes in an abritrary number of arguments to abritrary functions
                 
     return
 
@@ -58,7 +58,7 @@ def New_GOTO_GC():
             if icon != None:    # Check if scenario is present
                 icon.highlight(1)
                 print("Found",j)
-                func(*args(jcon=icon, target="Ghost_Castle_Icon.png"))     # *args handles passes in an abritrary number of arguments to abritrary functions
+                func(*args(jcon=icon, target = "Ghost_Castle_Icon.png"))     # *args handles passes in an abritrary number of arguments to abritrary functions
     
     return
 
@@ -66,9 +66,12 @@ def New_GOTO_GC():
 Clearing_Dungeon = {"Retry_icon.png" : (Network_Retry, lambda **kwargs: ()),    # **kwargs using get to pass specific args to the function
         "In_Dungeon_Icon.png" : (In_Dungeon, lambda **kwargs: ()),
         "Map_Open_Icon.png" : (Nav_Map, lambda **kwargs: (kwargs.get("o"),)),
-        "Open_Chest_Icon.png" : (Check_Chest, lambda **kwargs: ()),
+        "Open_Chest_Icon.png" : (click, lambda **kwargs: (kwargs.get("jcon"),)),
+        "Yuzu_Icon.png" : (click, lambda **kwargs: (kwargs.get("jcon"),)),
         "Chest_Trapped_Icon.png" : (Disarm_Chest, lambda **kwargs: ()),
-        "Ghost_Castle_Entrance_Icon.png": (Dungeon_Entrance, lambda **kwargs: (kwargs.get("jcon"),))}
+        "Ghost_Castle_Entrance_Icon.png": (Dungeon_Entrance, lambda **kwargs: (kwargs.get("jcon"),)),
+        "You_Received.png": (Check_Recieved, lambda **kwargs: (kwargs.get("jcon"),)),
+        "Defend_Icon.png": (Auto_Battle, lambda **kwargs: (kwargs.get("jcon"),))}
 
 # Possible scenarios when going to Northern Hollow
 GOTO_NH = {"Retry_icon.png" : (Network_Retry, lambda **kwargs: ()),    # **kwargs using get to pass specific args to the function
@@ -87,9 +90,13 @@ Stay_Inn = {"Retry_icon.png" : (Network_Retry, lambda **kwargs: ()),    # **kwar
         "Inn_Eco_Room_icon.png": (click, lambda **kwargs: (kwargs.get("jcon"),)),
         "OK_icon.png": (click, lambda **kwargs: (kwargs.get("jcon"),)),
         "Refilled_Icon.png": (Staying_Inn, lambda **kwargs: (kwargs.get("jcon"),)),
+        "Was_Learned_Icon.png": (click, lambda **kwargs: (kwargs.get("jcon"),)),
         "Close_lvl_up.png": (click, lambda **kwargs: (kwargs.get("jcon"),)),
         "Level_Up_Next_Icon.png": (click, lambda **kwargs: (kwargs.get("jcon"),))}
 
+#Settings.MinSimilarity = 0.7
+#icon = s.wait("Defend_Icon.png",d)
+#icon.highlight(1)
 
 flag = True
 while flag:
@@ -106,6 +113,8 @@ while flag:
         State = States[0]
         
     elif State == States[3]:    # Clearing dungeon
+        Clear_Dungeon()
+        Clear_Dungeon()
         Clear_Dungeon()
         State = States[2]
 
